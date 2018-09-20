@@ -25,10 +25,13 @@ void display(short** board) {
 			switch ((int)board[i][j]) {
 			case 1:
 				cout << "X";
+				break;
 			case 2:
 				cout << "O";
+				break;
 			default:
 				cout << " ";
+				break;
 			}
 			cout << "]";
 		}
@@ -44,7 +47,7 @@ bool iswin(short** board,short x,short y) {
 	for (int i = x; i >= 0&&board[i][y]==my; i--) {	//×ó
 		len++;
 	}
-	for (int i = x; i <=BOARD_LENGTH && board[i][y] == my; i++) {	//×ó
+	for (int i = x; i <=BOARD_LENGTH && board[i][y] == my; i++) {	//ÓÒ
 		len++;
 	}
 	if (len > 5) {
@@ -52,10 +55,10 @@ bool iswin(short** board,short x,short y) {
 	}
 	//Êú
 	len = 0;
-	for (int i = y; i >= 0 && board[x][i] == my; i--) {	//×ó
+	for (int i = y; i >= 0 && board[x][i] == my; i--) {	//ÉÏ
 		len++;
 	}
-	for (int i = x; i <= BOARD_LENGTH && board[x][i] == my; i++) {	//×ó
+	for (int i = x; i <= BOARD_LENGTH && board[x][i] == my; i++) {	//ÏÂ
 		len++;
 	}
 	if (len > 5) {
@@ -66,7 +69,7 @@ bool iswin(short** board,short x,short y) {
 	for (int i = x, j = y; i >= 0 && j <=BOARD_HIGH  && board[i][j] == my; i--,j++) {	//×ó
 		len++;
 	}
-	for (int i = x, j = y; i <= BOARD_LENGTH, j >= 0 && board[i][j] == my; i++, j--) {	//×ó
+	for (int i = x, j = y; i <= BOARD_LENGTH, j >= 0 && board[i][j] == my; i++, j--) {	//ÓÒ
 		len++;
 	}
 	if (len > 5) {
@@ -77,7 +80,7 @@ bool iswin(short** board,short x,short y) {
 	for (int i = x, j = y; i >= 0 && j >= 0 && board[i][j] == my; i--, j++) {	//×ó
 		len++;
 	}
-	for (int i = x, j = y; i <= BOARD_LENGTH, j <= BOARD_HIGH && board[i][j] == my; i++, j++) {	//×ó
+	for (int i = x, j = y; i <= BOARD_LENGTH, j <= BOARD_HIGH && board[i][j] == my; i++, j++) {	//ÓÒ
 		len++;
 	}
 	if (len > 5) {
@@ -120,15 +123,100 @@ int assess(short** board, short x, short y, int steps) {
 		return 100000;
 	}
 	auto my = board[x][y];
-	bool iscontinuity = true;
+	auto other = 3 - my;
+	short tempx, tempy;
+	bool iscontinuity1 = true, iscontinuity2 = true;
+	bool barrier1, barrier2;
+	int olen1,olen2,len;
+	int clen1,clen2,clen;
+	int score = 0;
+	//ºá
+	tempx = x;
+	tempy = y;
+	len = 0;
+	clen = 0;
+	olen1 = 0, olen2 = 0, clen1 = 0, clen2 = 0;
+	barrier1 = false, barrier2 = false;
+	iscontinuity1 = true, iscontinuity2 = true;
+	while (1) {	//¼Ó
+		if (tempx < 0 && tempx >= BOARD_LENGTH)
+			break;
+		if (tempy < 0 && tempy >= BOARD_HIGH)
+			break;
+		if (board[tempx][tempy] != my) {
+			if (board[tempx][tempy] == other) {
+				barrier1=true;
+				break;
+			}
+			else {
+				if (!iscontinuity1) {
+					break;
+				}
+				else {
+					iscontinuity1 = false;
+					continue;
+				}
+			}
+		}
+		if (iscontinuity1)
+			clen1++;
+		else
+			olen1++;
+		tempx++;
+	}
+	while (1) {	//¼õ
+		if (tempx < 0 && tempx >= BOARD_LENGTH)
+			break;
+		if (tempy < 0 && tempy >= BOARD_HIGH)
+			break;
+		if (board[tempx][tempy] != my) {
+			if (board[tempx][tempy] == other) {
+				barrier2 = true;
+				break;
+			}
+			else {
+				if (!iscontinuity2) {
+					break;
+				}
+				else {
+					iscontinuity2 = false;
+					continue;
+				}
+			}
+		}
+		if (iscontinuity2)
+			clen1++;
+		else
+			olen1++;
+		tempx--;
+	}
+	//ÆÀ·Ö
+	clen = clen1 + clen2 - 1;	//UNDONE:¿¼ÂÇÊÇ·ñÏ¸»¯ÆÀ·Ö
 	
 
+	//Êú
 
 	return 1;
 
 }
 
-int alphabeta() {
+int alphabeta(short** board,short& x,short& y,short human_pose,int steps,int thinkdeep) {
+	int win = 100000, draw = 0;
+	int thistp = 0;
+
+	if (human_pose==-1)
+		if (iswin(board, human_pose/BOARD_LENGTH, human_pose%BOARD_LENGTH)) {
+			return -win;
+		}
+		else
+			thistp = 1 << (thinkdeep);
+	if (steps == BOARD_LENGTH * BOARD_HIGH)
+		return 0;
+	for (short i = 0; i < BOARD_HIGH*BOARD_LENGTH; i++) {
+		if (board[i / BOARD_LENGTH][i%BOARD_LENGTH])
+			continue;
+		board[i / 3][i % 3] = my;
+	}
 	return 1;
 }
 
