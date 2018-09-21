@@ -200,29 +200,46 @@ int assess(short** board, short x, short y, int steps) {
 
 }
 
-int alphabeta(short** board,short& x,short& y,short human_pose,int steps,int thinkdeep) {
+int alphabeta(short my, short** board, int alpha,int beta, short& x, short& y, short human_pose, int steps, int thinkdeep) {
 	int win = 100000, draw = 0;
 	int thistp = 0;
-
-	if (human_pose==-1)
-		if (iswin(board, human_pose/BOARD_LENGTH, human_pose%BOARD_LENGTH)) {
+	int result;
+	short tmpx,tmpy;
+	if (human_pose == -1)
+		thistp = (1 << (thinkdeep)) - 1;
+	else
+		if (iswin(board, human_pose / BOARD_LENGTH, human_pose%BOARD_LENGTH)) {
 			return -win;
 		}
-		else
-			thistp = 1 << (thinkdeep);
+		
 	if (steps == BOARD_LENGTH * BOARD_HIGH)
 		return 0;
 	for (short i = 0; i < BOARD_HIGH*BOARD_LENGTH; i++) {
 		if (board[i / BOARD_LENGTH][i%BOARD_LENGTH])
 			continue;
-		board[i / 3][i % 3] = my;	//UNDONE:bug
+		if (alpha >= beta)
+			break;
+		board[i / BOARD_LENGTH][i % BOARD_LENGTH] = my;
+		steps++;
+		if (thinkdeep) {
+			result = assess(board, i / BOARD_LENGTH, i%BOARD_LENGTH, steps);
+		}
+		else
+			result = -alphabeta(3 - my, board, -beta, -alpha, tmpx, tmpy, i, steps, thistp - 1);
+		if (result > alpha) {
+			alpha = result;
+			x = i / BOARD_LENGTH;
+			y = i % BOARD_LENGTH;
+		}
+		board[i / BOARD_LENGTH][i % BOARD_LENGTH] = 0;
+		steps--;
 	}
-	return 1;
+	return alpha;
 }
 
 void cmphand(short** board, short& x, short& y, int& steps,int thinkdeep) {
 	
-
+	//UNDONE:È±ÉÙµ÷ÓÃ
 	board[x][y] = 2;
 	steps++;
 	display(board);
