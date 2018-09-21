@@ -1,5 +1,6 @@
 //五子棋程序
 #include<iostream>
+#include<math.h>
 
 const int BOARD_LENGTH = 15;
 const int BOARD_HIGH = 15;
@@ -118,6 +119,85 @@ void humanhand(short**board, short&x, short&y, int& steps) {
 	return;
 }
 
+//int assess(short** board, short x, short y, int steps) {
+//	if (iswin(board, x, y)) {
+//		return 100000;
+//	}
+//	auto my = board[x][y];
+//	auto other = 3 - my;
+//	short tempx, tempy;
+//	bool iscontinuity1 = true, iscontinuity2 = true;
+//	bool barrier1, barrier2;
+//	int olen1,olen2,len;
+//	int clen1,clen2,clen;
+//	int score = 0;
+//	//横
+//	tempx = x;
+//	tempy = y;
+//	len = 0;
+//	clen = 0;
+//	olen1 = 0, olen2 = 0, clen1 = 0, clen2 = 0;
+//	barrier1 = false, barrier2 = false;
+//	iscontinuity1 = true, iscontinuity2 = true;
+//	while (1) {	//加
+//		if (tempx < 0 && tempx >= BOARD_LENGTH)
+//			break;
+//		if (tempy < 0 && tempy >= BOARD_HIGH)
+//			break;
+//		if (board[tempx][tempy] != my) {
+//			if (board[tempx][tempy] == other) {
+//				barrier1=true;
+//				break;
+//			}
+//			else {
+//				if (!iscontinuity1) {
+//					break;
+//				}
+//				else {
+//					iscontinuity1 = false;
+//					continue;
+//				}
+//			}
+//		}
+//		if (iscontinuity1)
+//			clen1++;
+//		else
+//			olen1++;
+//		tempx++;
+//	}
+//	while (1) {	//减
+//		if (tempx < 0 && tempx >= BOARD_LENGTH)
+//			break;
+//		if (tempy < 0 && tempy >= BOARD_HIGH)
+//			break;
+//		if (board[tempx][tempy] != my) {
+//			if (board[tempx][tempy] == other) {
+//				barrier2 = true;
+//				break;
+//			}
+//			else {
+//				if (!iscontinuity2) {
+//					break;
+//				}
+//				else {
+//					iscontinuity2 = false;
+//					continue;
+//				}
+//			}
+//		}
+//		if (iscontinuity2)
+//			clen1++;
+//		else
+//			olen1++;
+//		tempx--;
+//	}
+//	//评分
+//	clen = clen1 + clen2 - 1;	//UNDONE:考虑是否细化评分
+//	
+//	//竖
+//	return 1;
+//}
+
 int assess(short** board, short x, short y, int steps) {
 	if (iswin(board, x, y)) {
 		return 100000;
@@ -125,19 +205,14 @@ int assess(short** board, short x, short y, int steps) {
 	auto my = board[x][y];
 	auto other = 3 - my;
 	short tempx, tempy;
-	bool iscontinuity1 = true, iscontinuity2 = true;
-	bool barrier1, barrier2;
-	int olen1,olen2,len;
-	int clen1,clen2,clen;
+	int barrier;
+	int len;
 	int score = 0;
 	//横
 	tempx = x;
 	tempy = y;
 	len = 0;
-	clen = 0;
-	olen1 = 0, olen2 = 0, clen1 = 0, clen2 = 0;
-	barrier1 = false, barrier2 = false;
-	iscontinuity1 = true, iscontinuity2 = true;
+	barrier = 0;
 	while (1) {	//加
 		if (tempx < 0 && tempx >= BOARD_LENGTH)
 			break;
@@ -145,25 +220,16 @@ int assess(short** board, short x, short y, int steps) {
 			break;
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
-				barrier1=true;
-				break;
-			}
-			else {
-				if (!iscontinuity1) {
-					break;
-				}
-				else {
-					iscontinuity1 = false;
-					continue;
-				}
+				barrier++;
+			break;
+			
 			}
 		}
-		if (iscontinuity1)
-			clen1++;
-		else
-			olen1++;
+		len;
 		tempx++;
 	}
+	tempx = x;
+	tempy = y;
 	while (1) {	//减
 		if (tempx < 0 && tempx >= BOARD_LENGTH)
 			break;
@@ -171,33 +237,146 @@ int assess(short** board, short x, short y, int steps) {
 			break;
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
-				barrier2 = true;
+				barrier++;
 				break;
 			}
-			else {
-				if (!iscontinuity2) {
-					break;
-				}
-				else {
-					iscontinuity2 = false;
-					continue;
-				}
-			}
 		}
-		if (iscontinuity2)
-			clen1++;
-		else
-			olen1++;
+		len++;
 		tempx--;
 	}
 	//评分
-	clen = clen1 + clen2 - 1;	//UNDONE:考虑是否细化评分
-	
-
+	len--;
+	if (barrier < 2) {
+		score += std::pow(10, len - barrier);
+	}
 	//竖
+	tempx = x;
+	tempy = y;
+	len = 0;
+	barrier = 0;
+	while (1) {	//加
+		if (tempx < 0 && tempx >= BOARD_LENGTH)
+			break;
+		if (tempy < 0 && tempy >= BOARD_HIGH)
+			break;
+		if (board[tempx][tempy] != my) {
+			if (board[tempx][tempy] == other) {
+				barrier++;
+				break;
 
-	return 1;
+			}
+		}
+		len;
+		tempy++;
+	}
+	tempx = x;
+	tempy = y;
+	while (1) {	//减
+		if (tempx < 0 && tempx >= BOARD_LENGTH)
+			break;
+		if (tempy < 0 && tempy >= BOARD_HIGH)
+			break;
+		if (board[tempx][tempy] != my) {
+			if (board[tempx][tempy] == other) {
+				barrier++;
+				break;
+			}
+		}
+		len++;
+		tempy--;
+	}
+	//评分
+	len--;
+	if (barrier < 2) {
+		score += std::pow(10, len - barrier);
+	}
+	//撇
+	tempx = x;
+	tempy = y;
+	len = 0;
+	barrier = 0;
+	while (1) {	//加
+		if (tempx < 0 && tempx >= BOARD_LENGTH)
+			break;
+		if (tempy < 0 && tempy >= BOARD_HIGH)
+			break;
+		if (board[tempx][tempy] != my) {
+			if (board[tempx][tempy] == other) {
+				barrier++;
+				break;
 
+			}
+		}
+		len;
+		tempx++;
+		tempx++;
+	}
+	tempx = x;
+	tempy = y;
+	while (1) {	//减
+		if (tempx < 0 && tempx >= BOARD_LENGTH)
+			break;
+		if (tempy < 0 && tempy >= BOARD_HIGH)
+			break;
+		if (board[tempx][tempy] != my) {
+			if (board[tempx][tempy] == other) {
+				barrier++;
+				break;
+			}
+		}
+		len++;
+		tempx--;
+		tempy--;
+	}
+	//评分
+	len--;
+	if (barrier < 2) {
+		score += std::pow(10, len - barrier);
+	}
+	//捺
+	tempx = x;
+	tempy = y;
+	len = 0;
+	barrier = 0;
+	while (1) {	//加
+		if (tempx < 0 && tempx >= BOARD_LENGTH)
+			break;
+		if (tempy < 0 && tempy >= BOARD_HIGH)
+			break;
+		if (board[tempx][tempy] != my) {
+			if (board[tempx][tempy] == other) {
+				barrier++;
+				break;
+
+			}
+		}
+		len;
+		tempx++;
+		tempy--;
+	}
+	tempx = x;
+	tempy = y;
+	while (1) {	//减
+		if (tempx < 0 && tempx >= BOARD_LENGTH)
+			break;
+		if (tempy < 0 && tempy >= BOARD_HIGH)
+			break;
+		if (board[tempx][tempy] != my) {
+			if (board[tempx][tempy] == other) {
+				barrier++;
+				break;
+			}
+		}
+		len++;
+		tempx--;
+		tempy++;
+	}
+	//评分
+	len--;
+	if (barrier < 2) {
+		score += std::pow(10, len - barrier);
+	}
+	return score;
 }
 
 int alphabeta(short my, short** board, int alpha,int beta, short& x, short& y, short human_pose, int steps, int thinkdeep) {
