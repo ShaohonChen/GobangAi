@@ -215,7 +215,7 @@ int alphabeta(short** board,short& x,short& y,short human_pose,int steps,int thi
 	for (short i = 0; i < BOARD_HIGH*BOARD_LENGTH; i++) {
 		if (board[i / BOARD_LENGTH][i%BOARD_LENGTH])
 			continue;
-		board[i / 3][i % 3] = my;
+		board[i / 3][i % 3] = my;	//UNDONE:bug
 	}
 	return 1;
 }
