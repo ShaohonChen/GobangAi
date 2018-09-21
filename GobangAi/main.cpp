@@ -11,7 +11,7 @@ void display(short** board) {
 	char character = 'A';
 	//打印字母
 	cout << endl;
-	cout << " ";
+	cout << "  ";
 	for (int i = 0; i < BOARD_LENGTH; i++) {
 		cout << " " << (char)(character + i) << " ";
 	}
@@ -23,7 +23,7 @@ void display(short** board) {
 			cout << " ";
 		for (int j = 0; j < BOARD_LENGTH; j++) {
 			cout << "[";
-			switch ((int)board[i][j]) {
+			switch ((int)board[j][i]) {
 			case 1:
 				cout << "X";
 				break;
@@ -45,10 +45,10 @@ bool iswin(short** board,short x,short y) {
 	short len;
 	//横
 	len = 0;
-	for (int i = x; i >= 0&&board[i][y]==my; i--) {	//左
+	for (int i = x; i >= 0 && board[i][y]==my; i--) {	//左
 		len++;
 	}
-	for (int i = x; i <=BOARD_LENGTH && board[i][y] == my; i++) {	//右
+	for (int i = x; i < BOARD_LENGTH && board[i][y] == my; i++) {	//右
 		len++;
 	}
 	if (len > 5) {
@@ -59,7 +59,7 @@ bool iswin(short** board,short x,short y) {
 	for (int i = y; i >= 0 && board[x][i] == my; i--) {	//上
 		len++;
 	}
-	for (int i = x; i <= BOARD_LENGTH && board[x][i] == my; i++) {	//下
+	for (int i = y; i < BOARD_LENGTH && board[x][i] == my; i++) {	//下
 		len++;
 	}
 	if (len > 5) {
@@ -67,10 +67,10 @@ bool iswin(short** board,short x,short y) {
 	}
 	//撇
 	len = 0;
-	for (int i = x, j = y; i >= 0 && j <=BOARD_HIGH  && board[i][j] == my; i--,j++) {	//左
+	for (int i = x, j = y; i >= 0 && j < BOARD_HIGH  && board[i][j] == my; i--,j++) {	//左
 		len++;
 	}
-	for (int i = x, j = y; i <= BOARD_LENGTH, j >= 0 && board[i][j] == my; i++, j--) {	//右
+	for (int i = x, j = y; i < BOARD_LENGTH, j >= 0 && board[i][j] == my; i++, j--) {	//右
 		len++;
 	}
 	if (len > 5) {
@@ -78,10 +78,10 @@ bool iswin(short** board,short x,short y) {
 	}
 	//捺
 	len = 0;
-	for (int i = x, j = y; i >= 0 && j >= 0 && board[i][j] == my; i--, j++) {	//左
+	for (int i = x, j = y; i >= 0 && j >= 0 && board[i][j] == my; i--, j--) {	//左
 		len++;
 	}
-	for (int i = x, j = y; i <= BOARD_LENGTH, j <= BOARD_HIGH && board[i][j] == my; i++, j++) {	//右
+	for (int i = x, j = y; i < BOARD_LENGTH, j < BOARD_HIGH && board[i][j] == my; i++, j++) {	//右
 		len++;
 	}
 	if (len > 5) {
@@ -94,20 +94,32 @@ void humanhand(short**board, short&x, short&y, int& steps) {
 	using namespace std;
 	char row;
 	short column;
-
 	while (1) {
-		std::cout << std::endl << "请输入坐标（格式：字母 数字）：";
-		while (1) {	//UNDONE:输入问题
-
+		bool input = false;
+		while (!input) {
+			std::cout << std::endl << "请输入坐标（格式：字母 数字）：";
+			input = true;
+			cin >> row;
+			if (row > 'Z' || row < 'A') {
+				cout << "横坐标读入错误" << endl;
+				while (cin.get() != '\n');
+				cin.clear();
+				input = false;
+			}
+			if (!(cin >> column)) {
+				cout << "纵坐标格式错误" << endl;
+				cin.clear();
+				input = false;
+			}
 		}
 		x = (short)(row - 'A');
-		y = column;
-		if (x >= 0 && x <= BOARD_LENGTH && y >= 0 && y <= BOARD_HIGH) {
+		y = column - 1;
+		if (x < 0 || x >= BOARD_LENGTH || y < 0 && y >= BOARD_HIGH) {
 			cout << "超过边界！请重新输入" << endl;
 			display(board);
 			continue;
 		}
-		if (!board[x][y]) {
+		if (board[x][y]) {
 			cout << "此位置已有棋子！请重新输入" << endl;
 			display(board);
 			continue;
@@ -140,9 +152,9 @@ void humanhand(short**board, short&x, short&y, int& steps) {
 //	barrier1 = false, barrier2 = false;
 //	iscontinuity1 = true, iscontinuity2 = true;
 //	while (1) {	//加
-//		if (tempx < 0 && tempx >= BOARD_LENGTH)
+//		if (tempx < 0 || tempx >= BOARD_LENGTH)
 //			break;
-//		if (tempy < 0 && tempy >= BOARD_HIGH)
+//		if (tempy < 0 || tempy >= BOARD_HIGH)
 //			break;
 //		if (board[tempx][tempy] != my) {
 //			if (board[tempx][tempy] == other) {
@@ -166,9 +178,9 @@ void humanhand(short**board, short&x, short&y, int& steps) {
 //		tempx++;
 //	}
 //	while (1) {	//减
-//		if (tempx < 0 && tempx >= BOARD_LENGTH)
+//		if (tempx < 0 || tempx >= BOARD_LENGTH)
 //			break;
-//		if (tempy < 0 && tempy >= BOARD_HIGH)
+//		if (tempy < 0 || tempy >= BOARD_HIGH)
 //			break;
 //		if (board[tempx][tempy] != my) {
 //			if (board[tempx][tempy] == other) {
@@ -214,9 +226,9 @@ int assess(short** board, short x, short y, int steps) {
 	len = 0;
 	barrier = 0;
 	while (1) {	//加
-		if (tempx < 0 && tempx >= BOARD_LENGTH)
+		if (tempx < 0 || tempx >= BOARD_LENGTH)
 			break;
-		if (tempy < 0 && tempy >= BOARD_HIGH)
+		if (tempy < 0 || tempy >= BOARD_HIGH)
 			break;
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
@@ -231,9 +243,9 @@ int assess(short** board, short x, short y, int steps) {
 	tempx = x;
 	tempy = y;
 	while (1) {	//减
-		if (tempx < 0 && tempx >= BOARD_LENGTH)
+		if (tempx < 0 || tempx >= BOARD_LENGTH)
 			break;
-		if (tempy < 0 && tempy >= BOARD_HIGH)
+		if (tempy < 0 || tempy >= BOARD_HIGH)
 			break;
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
@@ -247,7 +259,7 @@ int assess(short** board, short x, short y, int steps) {
 	//评分
 	len--;
 	if (barrier < 2) {
-		score += std::pow(10, len - barrier);
+		score += (double)std::pow(10, len - barrier);
 	}
 	//竖
 	tempx = x;
@@ -255,9 +267,9 @@ int assess(short** board, short x, short y, int steps) {
 	len = 0;
 	barrier = 0;
 	while (1) {	//加
-		if (tempx < 0 && tempx >= BOARD_LENGTH)
+		if (tempx < 0 || tempx >= BOARD_LENGTH)
 			break;
-		if (tempy < 0 && tempy >= BOARD_HIGH)
+		if (tempy < 0 || tempy >= BOARD_HIGH)
 			break;
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
@@ -272,9 +284,9 @@ int assess(short** board, short x, short y, int steps) {
 	tempx = x;
 	tempy = y;
 	while (1) {	//减
-		if (tempx < 0 && tempx >= BOARD_LENGTH)
+		if (tempx < 0 || tempx >= BOARD_LENGTH)
 			break;
-		if (tempy < 0 && tempy >= BOARD_HIGH)
+		if (tempy < 0 || tempy >= BOARD_HIGH)
 			break;
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
@@ -288,7 +300,7 @@ int assess(short** board, short x, short y, int steps) {
 	//评分
 	len--;
 	if (barrier < 2) {
-		score += std::pow(10, len - barrier);
+		score += (double)std::pow(10, len - barrier);
 	}
 	//撇
 	tempx = x;
@@ -296,9 +308,9 @@ int assess(short** board, short x, short y, int steps) {
 	len = 0;
 	barrier = 0;
 	while (1) {	//加
-		if (tempx < 0 && tempx >= BOARD_LENGTH)
+		if (tempx < 0 || tempx >= BOARD_LENGTH)
 			break;
-		if (tempy < 0 && tempy >= BOARD_HIGH)
+		if (tempy < 0 || tempy >= BOARD_HIGH)
 			break;
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
@@ -314,9 +326,9 @@ int assess(short** board, short x, short y, int steps) {
 	tempx = x;
 	tempy = y;
 	while (1) {	//减
-		if (tempx < 0 && tempx >= BOARD_LENGTH)
+		if (tempx < 0 || tempx >= BOARD_LENGTH)
 			break;
-		if (tempy < 0 && tempy >= BOARD_HIGH)
+		if (tempy < 0 || tempy >= BOARD_HIGH)
 			break;
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
@@ -331,7 +343,7 @@ int assess(short** board, short x, short y, int steps) {
 	//评分
 	len--;
 	if (barrier < 2) {
-		score += std::pow(10, len - barrier);
+		score += (double)std::pow(10, len - barrier);
 	}
 	//捺
 	tempx = x;
@@ -339,9 +351,9 @@ int assess(short** board, short x, short y, int steps) {
 	len = 0;
 	barrier = 0;
 	while (1) {	//加
-		if (tempx < 0 && tempx >= BOARD_LENGTH)
+		if (tempx < 0 || tempx >= BOARD_LENGTH)
 			break;
-		if (tempy < 0 && tempy >= BOARD_HIGH)
+		if (tempy < 0 || tempy >= BOARD_HIGH)
 			break;
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
@@ -357,9 +369,9 @@ int assess(short** board, short x, short y, int steps) {
 	tempx = x;
 	tempy = y;
 	while (1) {	//减
-		if (tempx < 0 && tempx >= BOARD_LENGTH)
+		if (tempx < 0 || tempx >= BOARD_LENGTH)
 			break;
-		if (tempy < 0 && tempy >= BOARD_HIGH)
+		if (tempy < 0 || tempy >= BOARD_HIGH)
 			break;
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
@@ -374,7 +386,7 @@ int assess(short** board, short x, short y, int steps) {
 	//评分
 	len--;
 	if (barrier < 2) {
-		score += std::pow(10, len - barrier);
+		score += (double)std::pow(10, len - barrier);
 	}
 	return score;
 }
@@ -387,21 +399,21 @@ int alphabeta(short my, short** board, int alpha,int beta, short& x, short& y, s
 	if (human_pose == -1)
 		thistp = (1 << (thinkdeep)) - 1;
 	else
-		if (iswin(board, human_pose / BOARD_LENGTH, human_pose%BOARD_LENGTH)) {
+		if (iswin(board, human_pose / BOARD_LENGTH, human_pose % BOARD_LENGTH)) {
 			return -win;
 		}
-		
 	if (steps == BOARD_LENGTH * BOARD_HIGH)
 		return 0;
-	for (short i = 0; i < BOARD_HIGH*BOARD_LENGTH; i++) {
-		if (board[i / BOARD_LENGTH][i%BOARD_LENGTH])
+	for (short i = 0; i < BOARD_LENGTH*BOARD_HIGH; i++) {
+		if (board[i / BOARD_LENGTH][i % BOARD_LENGTH])
 			continue;
 		if (alpha >= beta)
 			break;
 		board[i / BOARD_LENGTH][i % BOARD_LENGTH] = my;
 		steps++;
 		if (thinkdeep) {
-			result = assess(board, i / BOARD_LENGTH, i%BOARD_LENGTH, steps);
+			result = assess(board, i / BOARD_LENGTH, i % BOARD_LENGTH, steps);
+			
 		}
 		else
 			result = -alphabeta(3 - my, board, -beta, -alpha, tmpx, tmpy, i, steps, thistp - 1);
@@ -417,8 +429,7 @@ int alphabeta(short my, short** board, int alpha,int beta, short& x, short& y, s
 }
 
 void cmphand(short** board, short& x, short& y, int& steps,int thinkdeep) {
-	
-	//UNDONE:缺少调用
+	alphabeta(2, board, -100000, +100000, x, y, -1, steps, thinkdeep);
 	board[x][y] = 2;
 	steps++;
 	display(board);
@@ -439,11 +450,10 @@ int main()
 	short x, y;
 	int steps = 0;
 	int thinkdeep = 8;
-
 	//确定先手
 	std::cout << "是否先手？(默认为是)(Y/N)" << std::endl;
 	char c;
-	while (c=std::cin.get()!='\n') {	//HACK: 输入方式有问题
+	while (c = std::cin.get()) {
 		if (c == 'Y') {
 			break;
 		}
@@ -453,11 +463,13 @@ int main()
 			break;
 		}
 		else {
-			std::cout << "input error" << std::endl;
+			std::cout << "输入错误" << std::endl;
 			while (std::cin.get() != '\n');
 			std::cin.clear();
+			std::cout << "是否先手？(默认为是)(Y/N)" << std::endl;
 		}
 	}
+	c = std::cin.get();
 	//显示棋盘
 	display(board);
 	while (1) {
@@ -467,18 +479,22 @@ int main()
 		}
 		humanhand(board, x, y, steps);
 		if (iswin(board,x,y)) {
+			display(board);
 			std::cout << "你赢了" << std::endl;
+			break;
 		}
 		if (steps == BOARD_HIGH * BOARD_LENGTH) {
+			display(board);
 			std::cout << "平局" << std::endl;
 			break;
 		}
 		cmphand(board, x, y, steps,thinkdeep);
 		if (iswin(board, x, y)) {
+			display(board);
 			std::cout << "你输了" << std::endl;
+			break;
 		}
 	}
-
 	system("pause");
 	return 0;
 }
