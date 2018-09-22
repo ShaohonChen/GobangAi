@@ -210,7 +210,7 @@ void humanhand(short**board, short&x, short&y, int& steps) {
 //	return 1;
 //}
 
-int assess(short** board, short x, short y, int steps) {
+int assessone(short** board, short x, short y, int steps) {
 	if (iswin(board, x, y)) {
 		return 100000;
 	}
@@ -391,7 +391,21 @@ int assess(short** board, short x, short y, int steps) {
 	return score;
 }
 
-int alphabeta(short my, short** board, int alpha,int beta, short& x, short& y, short human_pose, int steps, int thinkdeep) {
+int assessall(short** board, int steps,int my) {
+	int finial = 0, one = 0;
+	for (short i = 0; i < BOARD_LENGTH*BOARD_HIGH; i++) {
+		if (!board[i / BOARD_LENGTH][i % BOARD_LENGTH])
+			continue;
+		one = assessone(board, i / BOARD_LENGTH, i % BOARD_LENGTH, steps);
+		if (!board[i / BOARD_LENGTH][i % BOARD_LENGTH] == my) {
+			one = -one*5;
+		}
+		finial += one;
+	}
+	return finial;
+}
+
+int alphabeta(short my, short** board, int alpha,int beta, short& x, short& y, short human_pose, int steps, int thinkdeep) {	//HACK 内容有问题
 	int win = 100000, draw = 0;
 	int thistp = 0;
 	int result;
@@ -412,7 +426,7 @@ int alphabeta(short my, short** board, int alpha,int beta, short& x, short& y, s
 		board[i / BOARD_LENGTH][i % BOARD_LENGTH] = my;
 		steps++;
 		if (thinkdeep) {
-			result = assess(board, i / BOARD_LENGTH, i % BOARD_LENGTH, steps);
+			result = assessall(board, steps, my);
 			
 		}
 		else
