@@ -70,7 +70,7 @@ bool iswin(short** board,short x,short y) {
 	for (int i = x, j = y; i >= 0 && j < BOARD_HIGH  && board[i][j] == my; i--,j++) {	//左
 		len++;
 	}
-	for (int i = x, j = y; i < BOARD_LENGTH, j >= 0 && board[i][j] == my; i++, j--) {	//右
+	for (int i = x, j = y; i < BOARD_LENGTH && j >= 0 && board[i][j] == my; i++, j--) {	//右
 		len++;
 	}
 	if (len > 5) {
@@ -81,7 +81,7 @@ bool iswin(short** board,short x,short y) {
 	for (int i = x, j = y; i >= 0 && j >= 0 && board[i][j] == my; i--, j--) {	//左
 		len++;
 	}
-	for (int i = x, j = y; i < BOARD_LENGTH, j < BOARD_HIGH && board[i][j] == my; i++, j++) {	//右
+	for (int i = x, j = y; i < BOARD_LENGTH && j < BOARD_HIGH && board[i][j] == my; i++, j++) {	//右
 		len++;
 	}
 	if (len > 5) {
@@ -233,9 +233,8 @@ int assessone(short** board, short x, short y, int steps) {
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
 				barrier++;
-			break;
-			
 			}
+			break;
 		}
 		len;
 		tempx++;
@@ -250,8 +249,8 @@ int assessone(short** board, short x, short y, int steps) {
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
 				barrier++;
-				break;
 			}
+			break;
 		}
 		len++;
 		tempx--;
@@ -274,9 +273,8 @@ int assessone(short** board, short x, short y, int steps) {
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
 				barrier++;
-				break;
-
 			}
+			break;
 		}
 		len;
 		tempy++;
@@ -291,8 +289,8 @@ int assessone(short** board, short x, short y, int steps) {
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
 				barrier++;
-				break;
 			}
+			break;
 		}
 		len++;
 		tempy--;
@@ -315,9 +313,8 @@ int assessone(short** board, short x, short y, int steps) {
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
 				barrier++;
-				break;
-
 			}
+			break;
 		}
 		len;
 		tempx++;
@@ -333,8 +330,8 @@ int assessone(short** board, short x, short y, int steps) {
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
 				barrier++;
-				break;
 			}
+			break;
 		}
 		len++;
 		tempx--;
@@ -358,9 +355,8 @@ int assessone(short** board, short x, short y, int steps) {
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
 				barrier++;
-				break;
-
 			}
+			break;
 		}
 		len;
 		tempx++;
@@ -376,8 +372,8 @@ int assessone(short** board, short x, short y, int steps) {
 		if (board[tempx][tempy] != my) {
 			if (board[tempx][tempy] == other) {
 				barrier++;
-				break;
 			}
+			break;
 		}
 		len++;
 		tempx--;
@@ -397,7 +393,7 @@ int assessall(short** board, int steps,int my) {
 		if (!board[i / BOARD_LENGTH][i % BOARD_LENGTH])
 			continue;
 		one = assessone(board, i / BOARD_LENGTH, i % BOARD_LENGTH, steps);
-		if (!board[i / BOARD_LENGTH][i % BOARD_LENGTH] == my) {
+		if (!(board[i / BOARD_LENGTH][i % BOARD_LENGTH] == my)) {
 			one = -one*5;
 		}
 		finial += one;
@@ -407,12 +403,9 @@ int assessall(short** board, int steps,int my) {
 
 int alphabeta(short my, short** board, int alpha,int beta, short& x, short& y, short human_pose, int steps, int thinkdeep) {	//HACK 内容有问题
 	int win = 100000, draw = 0;
-	int thistp = 0;
 	int result;
 	short tmpx,tmpy;
-	if (human_pose == -1)
-		thistp = (1 << (thinkdeep)) - 1;
-	else
+	if (human_pose != -1) 
 		if (iswin(board, human_pose / BOARD_LENGTH, human_pose % BOARD_LENGTH)) {
 			return -win;
 		}
@@ -425,12 +418,11 @@ int alphabeta(short my, short** board, int alpha,int beta, short& x, short& y, s
 			break;
 		board[i / BOARD_LENGTH][i % BOARD_LENGTH] = my;
 		steps++;
-		if (thinkdeep) {
-			result = assessall(board, steps, my);
-			
+		if (!(thinkdeep>0)) {
+			result = -assessall(board, steps, 3-my);
 		}
 		else
-			result = -alphabeta(3 - my, board, -beta, -alpha, tmpx, tmpy, i, steps, thistp - 1);
+			result = -alphabeta(3 - my, board, -beta, -alpha, tmpx, tmpy, i, steps, thinkdeep - 1);
 		if (result > alpha) {
 			alpha = result;
 			x = i / BOARD_LENGTH;
@@ -443,10 +435,12 @@ int alphabeta(short my, short** board, int alpha,int beta, short& x, short& y, s
 }
 
 void cmphand(short** board, short& x, short& y, int& steps,int thinkdeep) {
-	alphabeta(2, board, -100000, +100000, x, y, -1, steps, thinkdeep);
+	alphabeta(2, board, -100000000000, +100000000000, x, y, -1, steps, thinkdeep);
 	board[x][y] = 2;
 	steps++;
 	display(board);
+	using namespace std;
+	cout << "电脑下：" << (char)('A' + x) << " " << y + 1 << endl;
 	return;
 }
 
@@ -463,7 +457,7 @@ int main()
 	}
 	short x, y;
 	int steps = 0;
-	int thinkdeep = 8;
+	int thinkdeep = 2;
 	//确定先手
 	std::cout << "是否先手？(默认为是)(Y/N)" << std::endl;
 	char c;
@@ -472,7 +466,7 @@ int main()
 			break;
 		}
 		else if (c == 'N') {
-			board[7][7] = 2;
+			board[BOARD_HIGH / 2][BOARD_LENGTH / 2] = 2;
 			steps++;
 			break;
 		}
